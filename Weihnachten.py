@@ -462,7 +462,7 @@ if not st.session_state.welcome_done:
     if is_christmas_season():
         st.markdown("""
             <h1 class="welcome-title">🎄 Frohe Weihnachten, Sophia! 🎄</h1>
-            <p style="color:white;font-size:1.5rem;margin:20px 0;">Ein ganz besonderes Geschenk nur für dich! ✨</p>
+            <p style="color:white;font-size:1.5rem;margin:20px 0;">Ein ganz besonderes Geschenk  für dich!</p>
         """, unsafe_allow_html=True)
         btn_text = "🎁 Geschenk öffnen ✨"
     else:
