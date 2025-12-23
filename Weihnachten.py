@@ -1,10 +1,11 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import json
 import io
 from datetime import datetime, date
 
-# PPTX Imports - VEREINFACHT!
+# PPTX Imports
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -21,79 +22,229 @@ def is_christmas_season():
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
-    page_title="Deine Lern-Assistent",
+    page_title=" Dein Lern-Assistent",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ===== CSS =====
+# ===== CONFETTI COMPONENT (THIS WORKS!) =====
+def show_confetti():
+    """Show confetti animation using HTML component"""
+    confetti_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            * { margin: 0; padding: 0; }
+            body { 
+                overflow: hidden; 
+                background: transparent;
+            }
+            .confetti {
+                position: fixed;
+                width: 15px;
+                height: 15px;
+                top: -20px;
+                animation: fall linear forwards;
+            }
+            
+            @keyframes fall {
+                0% {
+                    opacity: 1;
+                    top: -20px;
+                    transform: rotate(0deg) scale(1);
+                }
+                100% {
+                    opacity: 0.7;
+                    top: 100vh;
+                    transform: rotate(720deg) scale(0.8);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            const colors = ['#ff0000', '#00ff00', '#ffd700', '#ff69b4', '#00bfff', '#ff4500', '#9400d3', '#00ff7f', '#ff1493', '#ffffff'];
+            const shapes = ['square', 'circle', 'triangle'];
+            
+            function createConfetti() {
+                for (let i = 0; i < 150; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                        
+                        const size = Math.random() * 12 + 8;
+                        confetti.style.width = size + 'px';
+                        confetti.style.height = size + 'px';
+                        
+                        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                        if (shape === 'circle') {
+                            confetti.style.borderRadius = '50%';
+                        } else if (shape === 'triangle') {
+                            confetti.style.width = '0';
+                            confetti.style.height = '0';
+                            confetti.style.borderLeft = size/2 + 'px solid transparent';
+                            confetti.style.borderRight = size/2 + 'px solid transparent';
+                            confetti.style.borderBottom = size + 'px solid ' + colors[Math.floor(Math.random() * colors.length)];
+                            confetti.style.background = 'transparent';
+                        }
+                        
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 5000);
+                    }, i * 30);
+                }
+            }
+            
+            createConfetti();
+            // Repeat every 4 seconds
+            setInterval(createConfetti, 4000);
+        </script>
+    </body>
+    </html>
+    """
+    components.html(confetti_html, height=0)
+
+def show_confetti_burst():
+    """Show a short confetti burst"""
+    burst_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            * { margin: 0; padding: 0; }
+            body { overflow: hidden; background: transparent; }
+            .burst {
+                position: fixed;
+                width: 12px;
+                height: 12px;
+                border-radius: 3px;
+                animation: explode 1.5s ease-out forwards;
+            }
+            
+            @keyframes explode {
+                0% {
+                    opacity: 1;
+                    transform: translate(0, 0) rotate(0deg) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0.3);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            const colors = ['#ff0000', '#00ff00', '#ffd700', '#ff69b4', '#00bfff', '#ff4500', '#9400d3'];
+            
+            for (let i = 0; i < 100; i++) {
+                const burst = document.createElement('div');
+                burst.className = 'burst';
+                
+                const angle = (Math.PI * 2 * i) / 100;
+                const distance = 150 + Math.random() * 250;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                burst.style.setProperty('--tx', tx + 'px');
+                burst.style.setProperty('--ty', ty + 'px');
+                burst.style.left = '50vw';
+                burst.style.top = '50vh';
+                burst.style.background = colors[Math.floor(Math.random() * colors.length)];
+                burst.style.animationDelay = (Math.random() * 0.3) + 's';
+                
+                document.body.appendChild(burst);
+            }
+        </script>
+    </body>
+    </html>
+    """
+    components.html(burst_html, height=0)
+
+# ===== CSS STYLES =====
 def get_css():
     christmas_css = ""
     if is_christmas_season():
         christmas_css = """
-        .snowflake {
-            position: fixed;
-            top: -10px;
-            z-index: 9999;
-            color: #fff;
-            font-size: 1.5em;
-            text-shadow: 0 0 5px #fff;
-            animation: fall linear forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes fall {
-            to { transform: translateY(100vh) rotate(360deg); }
-        }
-        
         .christmas-lights {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 30px;
+            height: 35px;
             z-index: 9998;
             display: flex;
             justify-content: space-around;
-            background: linear-gradient(180deg, #1a472a 0%, transparent 100%);
-            padding-top: 5px;
+            background: linear-gradient(180deg, #0d3b1e 0%, transparent 100%);
+            padding-top: 8px;
+            pointer-events: none;
         }
         
         .light {
-            width: 15px;
-            height: 25px;
-            border-radius: 50%;
-            animation: glow 1s ease-in-out infinite alternate;
+            width: 18px;
+            height: 28px;
+            border-radius: 50% 50% 50% 50%;
+            animation: twinkle 1s ease-in-out infinite alternate;
+            box-shadow: 0 0 10px currentColor;
         }
         
-        .light:nth-child(4n+1) { background: #ff0000; animation-delay: 0s; }
-        .light:nth-child(4n+2) { background: #00ff00; animation-delay: 0.25s; }
-        .light:nth-child(4n+3) { background: #ffd700; animation-delay: 0.5s; }
-        .light:nth-child(4n+4) { background: #0066ff; animation-delay: 0.75s; }
+        .light:nth-child(5n+1) { background: #ff0000; color: #ff0000; animation-delay: 0s; }
+        .light:nth-child(5n+2) { background: #00ff00; color: #00ff00; animation-delay: 0.2s; }
+        .light:nth-child(5n+3) { background: #ffd700; color: #ffd700; animation-delay: 0.4s; }
+        .light:nth-child(5n+4) { background: #00bfff; color: #00bfff; animation-delay: 0.6s; }
+        .light:nth-child(5n+5) { background: #ff69b4; color: #ff69b4; animation-delay: 0.8s; }
         
-        @keyframes glow {
-            from { opacity: 0.4; box-shadow: 0 0 5px currentColor; }
-            to { opacity: 1; box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        @keyframes twinkle {
+            from { opacity: 0.5; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1.1); box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
         }
         
-        .tree-left, .tree-right {
+        .tree-emoji {
             position: fixed;
-            bottom: 0;
-            font-size: 3rem;
+            bottom: 10px;
+            font-size: 3.5rem;
             z-index: 9997;
-            animation: sway 3s ease-in-out infinite;
+            animation: tree-sway 4s ease-in-out infinite;
         }
         
-        .tree-left { left: 10px; }
-        .tree-right { right: 10px; }
+        .tree-left { left: 15px; }
+        .tree-right { right: 15px; }
         
-        @keyframes sway {
-            0%, 100% { transform: rotate(-2deg); }
-            50% { transform: rotate(2deg); }
+        @keyframes tree-sway {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
         }
         
-        .main .block-container { padding-top: 40px !important; }
+        .snow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9996;
+            background-image: 
+                radial-gradient(circle, white 1px, transparent 1px),
+                radial-gradient(circle, white 1px, transparent 1px),
+                radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px);
+            background-size: 50px 50px, 100px 100px, 150px 150px;
+            background-position: 0 0, 25px 25px, 50px 50px;
+            animation: snow-fall 20s linear infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes snow-fall {
+            from { background-position: 0 0, 25px 25px, 50px 50px; }
+            to { background-position: 0 500px, 25px 525px, 50px 550px; }
+        }
+        
+        .main .block-container { padding-top: 50px !important; }
         """
     
     return f"""
@@ -132,106 +283,109 @@ def get_css():
     .message-content {{ flex: 1; color: white; line-height: 1.6; }}
     
     .welcome-title {{
-        text-align: center;
-        font-size: 3rem;
+        font-size: 3.5rem;
         color: #ffd700;
-        text-shadow: 0 0 20px rgba(255,215,0,0.5);
-        animation: title-glow 2s ease-in-out infinite alternate;
-        margin: 2rem 0;
+        text-shadow: 
+            0 0 20px rgba(255,215,0,0.8),
+            0 0 40px rgba(255,215,0,0.6),
+            0 0 60px rgba(255,215,0,0.4);
+        animation: glow-pulse 2s ease-in-out infinite alternate;
+        margin: 1rem 0;
+        font-weight: bold;
+        text-align: center;
     }}
     
-    @keyframes title-glow {{
-        from {{ text-shadow: 0 0 20px rgba(255,215,0,0.5); }}
-        to {{ text-shadow: 0 0 40px rgba(255,215,0,0.8); }}
+    @keyframes glow-pulse {{
+        from {{ 
+            text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,215,0,0.6);
+            transform: scale(1);
+        }}
+        to {{ 
+            text-shadow: 0 0 30px rgba(255,215,0,1), 0 0 60px rgba(255,215,0,0.8), 0 0 80px rgba(255,215,0,0.5);
+            transform: scale(1.02);
+        }}
+    }}
+    
+    .welcome-subtitle {{
+        color: white;
+        font-size: 1.5rem;
+        text-align: center;
+        margin: 15px 0 30px 0;
+        opacity: 0.95;
     }}
     
     .slide-preview {{
         background: white;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 12px 0;
         color: #333;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }}
     
     .slide-preview h4 {{
         color: #667eea;
-        margin-bottom: 10px;
-        border-bottom: 2px solid #764ba2;
-        padding-bottom: 5px;
+        margin-bottom: 12px;
+        border-bottom: 3px solid #764ba2;
+        padding-bottom: 8px;
     }}
     
     .download-section {{
         background: linear-gradient(135deg, #11998e, #38ef7d);
-        padding: 20px;
+        padding: 25px;
         border-radius: 15px;
         text-align: center;
-        margin: 20px 0;
+        margin: 25px 0;
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);
     }}
     
     .header-container {{
         text-align: center;
-        padding: 1rem;
+        padding: 1.5rem;
         color: white;
     }}
     
     .header-container h1 {{
         font-size: 2.2rem;
-        margin-bottom: 0.3rem;
-    }}
-    
-    .header-container p {{
-        opacity: 0.9;
-        font-size: 1rem;
+        margin-bottom: 0.5rem;
     }}
     
     {christmas_css}
     </style>
     """
 
-def get_christmas_html():
+def get_christmas_decorations():
     if not is_christmas_season():
         return ""
     
-    return """
-    <div class="christmas-lights">
-        <div class="light"></div><div class="light"></div><div class="light"></div>
-        <div class="light"></div><div class="light"></div><div class="light"></div>
-        <div class="light"></div><div class="light"></div><div class="light"></div>
-        <div class="light"></div><div class="light"></div><div class="light"></div>
-    </div>
-    <div class="tree-left">🎄</div>
-    <div class="tree-right">🎄</div>
+    lights = '<div class="light"></div>' * 20
     
-    <script>
-    function createSnowflakes() {
-        const snowflakes = ['❄', '❅', '❆'];
-        setInterval(() => {
-            const sf = document.createElement('div');
-            sf.className = 'snowflake';
-            sf.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
-            sf.style.left = Math.random() * 100 + 'vw';
-            sf.style.animationDuration = (Math.random() * 3 + 4) + 's';
-            document.body.appendChild(sf);
-            setTimeout(() => sf.remove(), 7000);
-        }, 300);
-    }
-    createSnowflakes();
-    </script>
+    return f"""
+    <div class="christmas-lights">{lights}</div>
+    <div class="tree-emoji tree-left">🎄</div>
+    <div class="tree-emoji tree-right">🎄</div>
+    <div class="snow-overlay"></div>
     """
 
 # ===== INJECT CSS =====
 st.markdown(get_css(), unsafe_allow_html=True)
-st.markdown(get_christmas_html(), unsafe_allow_html=True)
+st.markdown(get_christmas_decorations(), unsafe_allow_html=True)
 
-# ===== SESSION STATE INITIALIZATION =====
+# ===== SESSION STATE =====
 if 'initialized' not in st.session_state:
     st.session_state.initialized = True
-    st.session_state.welcome_done = False
     st.session_state.all_chats = {}
     st.session_state.current_chat_id = None
     st.session_state.current_pptx = None
     st.session_state.current_pptx_name = None
+    st.session_state.show_burst = False
+
+# Check if welcomed via query params (persists across refreshes!)
+query_params = st.query_params
+welcome_done = query_params.get("welcomed", "false") == "true"
+
+if 'welcome_done' not in st.session_state:
+    st.session_state.welcome_done = welcome_done
 
 # ===== HELPER FUNCTIONS =====
 def generate_chat_id():
@@ -265,7 +419,7 @@ def fetch_pexels_image(query):
     try:
         headers = {"Authorization": PEXELS_API_KEY}
         response = requests.get(
-            f"https://api.pexels.com/v1/search?query={query}&per_page=1",
+            f"https://api.pexels.com/v1/search?query={query}&per_page=1&orientation=landscape",
             headers=headers,
             timeout=10
         )
@@ -286,7 +440,7 @@ REGELN:
 - Verwende einfache, schulgerechte Sprache
 - Sei ermutigend und geduldig
 - Erkläre Schritt für Schritt
-- Löse Hausaufgaben
+- Löse Hausaufgaben nicht komplett
 
 PRÄSENTATIONSMODUS:
 Wenn nach einer Präsentation gefragt wird, antworte NUR mit validem JSON:
@@ -301,14 +455,12 @@ Wenn nach einer Präsentation gefragt wird, antworte NUR mit validem JSON:
   ]
 }
 
-WICHTIG FÜR PRÄSENTATIONEN:
-- Erstelle 5-10 Folien, hängt an den Thema
-- Erste Folie = Titelfolie (nur Titel, text kann leer sein)
-- Letzte Folie = "Vielen Dank!" oder "Fragen?"
+WICHTIG:
+- 5-7 Folien
+- Erste Folie = Titelfolie (text leer lassen)
 - 3-5 kurze Stichpunkte pro Folie
-- imageQuery MUSS auf Englisch sein (2-4 Wörter)
-- Keine Emojis im JSON
-- Kein Text außerhalb des JSON"""
+- imageQuery auf Englisch
+- Keine Emojis im JSON"""
 
     api_messages = [{"role": "system", "content": system_prompt}]
     
@@ -316,7 +468,7 @@ WICHTIG FÜR PRÄSENTATIONEN:
         if msg["role"] in ["user", "assistant"]:
             content = msg.get("content", "")
             if msg.get("is_presentation"):
-                content = "Ich habe eine Präsentation erstellt."
+                content = "Präsentation erstellt."
             if content:
                 api_messages.append({"role": msg["role"], "content": content})
 
@@ -338,20 +490,9 @@ WICHTIG FÜR PRÄSENTATIONEN:
         data = response.json()
         return data["choices"][0]["message"]["content"]
     except Exception as e:
-        return f"Entschuldigung, es gab einen Fehler: {str(e)}"
+        return f"Fehler: {str(e)}"
 
-# ===== POWERPOINT CREATION - OHNE RgbColor! =====
-def set_shape_color(shape, r, g, b):
-    """Setzt die Füllfarbe einer Form ohne RgbColor"""
-    shape.fill.solid()
-    shape.fill.fore_color.theme_color = None
-    fill = shape.fill._xPr
-    solidFill = fill.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}solidFill')
-    if solidFill is not None:
-        srgbClr = solidFill.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}srgbClr')
-        if srgbClr is not None:
-            srgbClr.set('val', f'{r:02X}{g:02X}{b:02X}')
-
+# ===== POWERPOINT CREATION =====
 def create_powerpoint(json_data, progress_bar=None):
     prs = Presentation()
     prs.slide_width = Inches(13.333)
@@ -361,40 +502,41 @@ def create_powerpoint(json_data, progress_bar=None):
     
     for idx, slide_data in enumerate(json_data['slides']):
         if progress_bar:
-            progress_bar.progress((idx + 1) / total_slides, f"Erstelle Folie {idx + 1} von {total_slides}...")
+            progress_bar.progress((idx + 1) / total_slides, f"Folie {idx + 1}/{total_slides}...")
         
-        # Benutze ein Layout mit Hintergrund
-        slide_layout = prs.slide_layouts[6]  # Blank
+        slide_layout = prs.slide_layouts[6]
         slide = prs.slides.add_slide(slide_layout)
         
         is_title_slide = idx == 0 or not slide_data.get('text') or len(slide_data['text']) == 0
         
         if is_title_slide:
-            # TITELFOLIE
+            # TITLE SLIDE
             title_box = slide.shapes.add_textbox(
-                Inches(0.5), Inches(2.5), Inches(12.333), Inches(2)
+                Inches(1), Inches(2.8), Inches(11.333), Inches(1.5)
             )
             title_frame = title_box.text_frame
             title_frame.word_wrap = True
             title_para = title_frame.paragraphs[0]
             title_para.text = slide_data['slideTitle']
-            title_para.font.size = Pt(54)
+            title_para.font.size = Pt(52)
             title_para.font.bold = True
             title_para.alignment = PP_ALIGN.CENTER
             
-            subtitle_box = slide.shapes.add_textbox(
-                Inches(2), Inches(4.5), Inches(9.333), Inches(0.8)
-            )
-            sub_frame = subtitle_box.text_frame
-            sub_para = sub_frame.paragraphs[0]
-            sub_para.text = json_data.get('title', '')
-            sub_para.font.size = Pt(24)
-            sub_para.alignment = PP_ALIGN.CENTER
-            
+            if idx == 0:
+                subtitle_box = slide.shapes.add_textbox(
+                    Inches(2), Inches(4.5), Inches(9.333), Inches(1)
+                )
+                sub_frame = subtitle_box.text_frame
+                sub_para = sub_frame.paragraphs[0]
+                sub_para.text = json_data.get('title', '')
+                sub_para.font.size = Pt(28)
+                sub_para.alignment = PP_ALIGN.CENTER
         else:
-            # INHALTSFOLIE
+            # CONTENT SLIDE - TEXT LEFT, IMAGE RIGHT
+            
+            # Title
             title_box = slide.shapes.add_textbox(
-                Inches(0.5), Inches(0.3), Inches(12.333), Inches(1)
+                Inches(0.6), Inches(0.4), Inches(12), Inches(0.9)
             )
             title_frame = title_box.text_frame
             title_para = title_frame.paragraphs[0]
@@ -402,9 +544,17 @@ def create_powerpoint(json_data, progress_bar=None):
             title_para.font.size = Pt(36)
             title_para.font.bold = True
             
-            # Text content
+            # Line under title
+            line = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(0.6), Inches(1.25), Inches(5.5), Inches(0.06)
+            )
+            line.fill.solid()
+            line.line.fill.background()
+            
+            # LEFT: Text
             text_box = slide.shapes.add_textbox(
-                Inches(0.5), Inches(1.5), Inches(6), Inches(5.5)
+                Inches(0.6), Inches(1.6), Inches(5.6), Inches(5.4)
             )
             text_frame = text_box.text_frame
             text_frame.word_wrap = True
@@ -415,19 +565,31 @@ def create_powerpoint(json_data, progress_bar=None):
                 else:
                     para = text_frame.add_paragraph()
                 
-                para.text = f"• {point}"
-                para.font.size = Pt(22)
-                para.space_after = Pt(18)
+                para.text = f"•  {point}"
+                para.font.size = Pt(20)
+                para.space_after = Pt(14)
             
-            # Bild hinzufügen
+            # RIGHT: Image
             if slide_data.get('imageQuery'):
                 img_bytes, _ = fetch_pexels_image(slide_data['imageQuery'])
                 if img_bytes:
                     try:
                         image_stream = io.BytesIO(img_bytes)
+                        
+                        # White frame
+                        frame = slide.shapes.add_shape(
+                            MSO_SHAPE.ROUNDED_RECTANGLE,
+                            Inches(6.7), Inches(1.3),
+                            Inches(6.1), Inches(5.7)
+                        )
+                        frame.fill.solid()
+                        frame.line.fill.background()
+                        
+                        # Image
                         slide.shapes.add_picture(
                             image_stream,
-                            Inches(7), Inches(1.5), Inches(5.8), Inches(5)
+                            Inches(6.8), Inches(1.4),
+                            Inches(5.9), Inches(5.5)
                         )
                     except Exception:
                         pass
@@ -435,54 +597,70 @@ def create_powerpoint(json_data, progress_bar=None):
     pptx_bytes = io.BytesIO()
     prs.save(pptx_bytes)
     pptx_bytes.seek(0)
-    
     return pptx_bytes.getvalue()
 
 def render_presentation_preview(json_data):
-    st.markdown(f"### 📊 Vorschau: {json_data['title']}")
+    st.markdown(f"### 📊 {json_data['title']}")
     
-    cols = st.columns(2)
     for i, slide in enumerate(json_data['slides']):
-        with cols[i % 2]:
-            text_html = ''.join(f"<li>{point}</li>" for point in slide.get('text', []))
+        text_items = slide.get('text', [])
+        text_html = ''.join(f"<li>{p}</li>" for p in text_items)
+        
+        if i == 0 or not text_items:
+            st.markdown(f"""
+                <div class="slide-preview" style="text-align:center;">
+                    <h4 style="border:none;">Folie {i+1}: {slide['slideTitle']}</h4>
+                    <p style="color:#888;">Titelfolie</p>
+                </div>
+            """, unsafe_allow_html=True)
+        else:
             st.markdown(f"""
                 <div class="slide-preview">
-                    <h4>📄 Folie {i + 1}: {slide['slideTitle']}</h4>
-                    <ul>{text_html}</ul>
-                    <small style="color:#888;">🖼️ Bild: {slide.get('imageQuery', 'Kein Bild')}</small>
+                    <h4>Folie {i+1}: {slide['slideTitle']}</h4>
+                    <div style="display:flex;gap:20px;">
+                        <div style="flex:1;"><ul>{text_html}</ul></div>
+                        <div style="flex:1;text-align:center;color:#888;">🖼️ {slide.get('imageQuery', '')}</div>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
 
 # ===== WELCOME SCREEN =====
 if not st.session_state.welcome_done:
-    st.markdown("""
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;">
-    """, unsafe_allow_html=True)
+    # SHOW CONFETTI! (This actually works)
+    show_confetti()
+    
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
     
     if is_christmas_season():
         st.markdown("""
             <h1 class="welcome-title">🎄 Frohe Weihnachten, Sophia! 🎄</h1>
-            <p style="color:white;font-size:1.5rem;margin:20px 0;">Ein ganz besonderes Geschenk  für dich!</p>
+            <p class="welcome-subtitle">Ein ganz besonderes Geschenk nur für dich!</p>
         """, unsafe_allow_html=True)
-        btn_text = "🎁 Geschenk öffnen ✨"
+        btn_text = "🎁 Geschenk öffnen"
     else:
         st.markdown("""
             <h1 class="welcome-title">👋 Willkommen, Sophia!</h1>
-            <p style="color:white;font-size:1.5rem;margin:20px 0;">Dein persönlicher Lern-Assistent ist bereit!</p>
+            <p class="welcome-subtitle">Dein persönlicher Lern-Assistent ist bereit!</p>
         """, unsafe_allow_html=True)
         btn_text = "🚀 Los geht's!"
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button(btn_text, use_container_width=True, type="primary"):
+            st.query_params["welcomed"] = "true"
             st.session_state.welcome_done = True
+            st.session_state.show_burst = True
             create_new_chat()
             st.rerun()
     
-    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
-# ===== SIDEBAR - CHAT HISTORY =====
+# ===== CONFETTI BURST AFTER BUTTON =====
+if st.session_state.get('show_burst', False):
+    show_confetti_burst()
+    st.session_state.show_burst = False
+
+# ===== SIDEBAR =====
 with st.sidebar:
     st.markdown("## 💬 Chats")
     
@@ -523,7 +701,6 @@ with st.sidebar:
                 st.rerun()
     
     if not st.session_state.all_chats:
-        st.markdown("*Keine Chats vorhanden*")
         create_new_chat()
 
 # ===== MAIN APP =====
@@ -535,70 +712,65 @@ current_chat = st.session_state.all_chats[st.session_state.current_chat_id]
 # Header
 st.markdown("""
     <div class="header-container">
-        <h1>🎓 Sophias Lern-Assistent</h1>
-        <p>Ich helfe dir bei Hausaufgaben und erstelle PowerPoint-Präsentationen!</p>
+        <h1>🎓 Dein Lern-Assistent</h1>
+        <p>Hausaufgabenhilfe & PowerPoint-Präsentationen!</p>
     </div>
 """, unsafe_allow_html=True)
 
-# Chat messages
-chat_container = st.container()
+# Messages
+messages = current_chat.get("messages", [])
 
-with chat_container:
-    messages = current_chat.get("messages", [])
-    
-    if not messages:
-        st.markdown("""
-            <div class="chat-message ai">
-                <span class="avatar">🤖</span>
-                <div class="message-content">
-                    Hallo Sophia! 👋 Ich bin dein persönlicher Lern-Assistent.<br><br>
-                    <b>Was ich kann:</b><br>
-                    📚 Bei Hausaufgaben helfen<br>
-                    📊 <b>PowerPoint-Präsentationen erstellen</b> (zum Download!)<br><br>
-                    Sag einfach z.B.: <i>"Erstelle eine Präsentation über das Sonnensystem"</i>
-                </div>
+if not messages:
+    st.markdown("""
+        <div class="chat-message ai">
+            <span class="avatar">🤖</span>
+            <div class="message-content">
+                Hallo Sophia! 👋<br><br>
+                <b>Ich kann:</b><br>
+                📚 Bei Hausaufgaben helfen<br>
+                📊 PowerPoint-Präsentationen erstellen<br><br>
+                Sag z.B.: <i>"Erstelle eine Präsentation über Vulkane"</i>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+for msg in messages:
+    if msg["role"] == "user":
+        st.markdown(f"""
+            <div class="chat-message user">
+                <span class="avatar">👩</span>
+                <div class="message-content">{msg["content"]}</div>
             </div>
         """, unsafe_allow_html=True)
-    
-    for msg in messages:
-        if msg["role"] == "user":
+    else:
+        if msg.get("is_presentation"):
+            st.markdown("""
+                <div class="chat-message ai">
+                    <span class="avatar">🤖</span>
+                    <div class="message-content">✅ Präsentation fertig!</div>
+                </div>
+            """, unsafe_allow_html=True)
+            render_presentation_preview(msg["presentation_data"])
+        else:
             st.markdown(f"""
-                <div class="chat-message user">
-                    <span class="avatar">👩</span>
+                <div class="chat-message ai">
+                    <span class="avatar">🤖</span>
                     <div class="message-content">{msg["content"]}</div>
                 </div>
             """, unsafe_allow_html=True)
-        else:
-            if msg.get("is_presentation"):
-                st.markdown("""
-                    <div class="chat-message ai">
-                        <span class="avatar">🤖</span>
-                        <div class="message-content">
-                            ✅ Deine Präsentation ist fertig! Hier ist eine Vorschau:
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
-                render_presentation_preview(msg["presentation_data"])
-            else:
-                st.markdown(f"""
-                    <div class="chat-message ai">
-                        <span class="avatar">🤖</span>
-                        <div class="message-content">{msg["content"]}</div>
-                    </div>
-                """, unsafe_allow_html=True)
 
-# Download button
+# Download
 if st.session_state.current_pptx:
     st.markdown("""
         <div class="download-section">
-            <h3 style="color:white;margin-bottom:10px;">📥 Deine PowerPoint ist bereit!</h3>
+            <h3 style="color:white;">📥 PowerPoint bereit!</h3>
         </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.download_button(
-            label="⬇️ PowerPoint herunterladen (.pptx)",
+            label="⬇️ Herunterladen (.pptx)",
             data=st.session_state.current_pptx,
             file_name=st.session_state.current_pptx_name,
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -606,14 +778,14 @@ if st.session_state.current_pptx:
             type="primary"
         )
 
-# Input area
+# Input
 st.markdown("<br>", unsafe_allow_html=True)
 col1, col2 = st.columns([5, 1])
 
 with col1:
     user_input = st.text_input(
         "Nachricht",
-        placeholder="Schreibe deine Nachricht hier...",
+        placeholder="Schreibe hier...",
         label_visibility="collapsed",
         key="user_input"
     )
@@ -621,7 +793,6 @@ with col1:
 with col2:
     send_button = st.button("📤", use_container_width=True, type="primary")
 
-# Process input
 if send_button and user_input:
     current_chat["messages"].append({"role": "user", "content": user_input})
     
@@ -631,7 +802,7 @@ if send_button and user_input:
     st.session_state.current_pptx = None
     st.session_state.current_pptx_name = None
     
-    with st.spinner("🤔 Ich denke nach..."):
+    with st.spinner("🤔 Denke nach..."):
         response = call_groq_api(current_chat["messages"])
     
     try:
@@ -644,17 +815,15 @@ if send_button and user_input:
                 "presentation_data": json_data
             })
             
-            st.info("🎨 Erstelle PowerPoint mit Bildern...")
-            progress_bar = st.progress(0, "Starte...")
+            st.info("🎨 Erstelle PowerPoint...")
+            progress_bar = st.progress(0)
             
             pptx_bytes = create_powerpoint(json_data, progress_bar)
             
-            clean_title = json_data['title'].replace(" ", "_").replace("/", "-")[:50]
-            filename = f"{clean_title}.pptx"
+            filename = json_data['title'].replace(" ", "_")[:50] + ".pptx"
             
             st.session_state.current_pptx = pptx_bytes
             st.session_state.current_pptx_name = filename
-            
             current_chat["pptx_data"] = pptx_bytes
             current_chat["pptx_name"] = filename
             
@@ -667,10 +836,9 @@ if send_button and user_input:
     st.rerun()
 
 # Footer
-st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
-    <div style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.8rem;">
-      Von Shiva :)
+    <br><br>
+    <div style="text-align:center;color:rgba(255,255,255,0.4);font-size:0.8rem;">
+        Von Shiva:)
     </div>
 """, unsafe_allow_html=True)
-
