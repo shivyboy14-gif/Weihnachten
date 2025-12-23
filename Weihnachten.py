@@ -15,6 +15,14 @@ from pptx.enum.shapes import MSO_SHAPE
 GROQ_API_KEY = "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"
 PEXELS_API_KEY = "3Y3jiJZ6WAL49N6lPsdlRbRZ6IZBfHZFHP86dr9yZfxFYoxedLLlDKAC"
 
+# ===== RERUN HELPER (Compatible with all versions) =====
+def do_rerun():
+    """Rerun that works with all Streamlit versions"""
+    try:
+        st.rerun()
+    except AttributeError:
+        st.experimental_rerun()
+
 # ===== CHECK IF CHRISTMAS SEASON =====
 def is_christmas_season():
     today = date.today()
@@ -22,7 +30,7 @@ def is_christmas_season():
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
-    page_title="Dein Lern-Assistent",
+    page_title="Sophias Lern-Assistent",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -679,7 +687,7 @@ if not st.session_state.welcome_done:
             st.session_state.welcome_done = True
             st.session_state.show_burst = True
             create_new_chat()
-            st.rerun()
+            do_rerun()
     
     st.stop()
 
@@ -694,7 +702,7 @@ with st.sidebar:
     
     if st.button("➕ Neuer Chat", use_container_width=True, type="primary"):
         create_new_chat()
-        st.rerun()
+        do_rerun()
     
     st.markdown("---")
     
@@ -711,7 +719,7 @@ with st.sidebar:
                 st.session_state.current_chat_id = chat_id
                 st.session_state.current_pptx = chat_data.get("pptx_data")
                 st.session_state.current_pptx_name = chat_data.get("pptx_name")
-                st.rerun()
+                do_rerun()
         
         with col2:
             if st.button("🗑️", key=f"del_{chat_id}"):
@@ -721,7 +729,7 @@ with st.sidebar:
                         st.session_state.current_chat_id = list(st.session_state.all_chats.keys())[0]
                     else:
                         create_new_chat()
-                st.rerun()
+                do_rerun()
     
     if not st.session_state.all_chats:
         create_new_chat()
@@ -734,7 +742,7 @@ current_chat = st.session_state.all_chats[st.session_state.current_chat_id]
 
 st.markdown("""
     <div class="header-container">
-        <h1>🎓 Dein Lern-Assistent</h1>
+        <h1>🎓 Sophias Lern-Assistent</h1>
         <p>Hausaufgabenhilfe & PowerPoint-Präsentationen!</p>
     </div>
 """, unsafe_allow_html=True)
@@ -871,11 +879,11 @@ with col1:
 with col2:
     if st.button("📤", use_container_width=True, type="primary"):
         send_message()
-        st.rerun()
+        do_rerun()
 
 st.markdown("""
     <br><br>
     <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem;">
-        von Shiva :)
+        Mit 💜 von Shiva für Sophia
     </div>
 """, unsafe_allow_html=True)
