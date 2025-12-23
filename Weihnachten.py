@@ -742,7 +742,7 @@ current_chat = st.session_state.all_chats[st.session_state.current_chat_id]
 
 st.markdown("""
     <div class="header-container">
-        <h1>🎓 Sophias Lern-Assistent</h1>
+        <h1>🎓 Deine Lern-Assistent</h1>
         <p>Hausaufgabenhilfe & PowerPoint-Präsentationen!</p>
     </div>
 """, unsafe_allow_html=True)
@@ -886,6 +886,7 @@ st.markdown("""
     <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem;">
         von Shiva:)    </div>
 """, unsafe_allow_html=True)
+
 
 
 
