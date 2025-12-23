@@ -769,7 +769,7 @@ for msg in messages:
     if msg["role"] == "user":
         st.markdown(f"""
             <div class="chat-message user">
-                <span class="avatar"> <3 </span>
+                <span class="avatar">  </span>
                 <div class="message-content">{msg["content"]}</div>
             </div>
         """, unsafe_allow_html=True)
@@ -887,6 +887,7 @@ st.markdown("""
     <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem;">
         von Shiva:)    </div>
 """, unsafe_allow_html=True)
+
 
 
 
