@@ -30,7 +30,7 @@ def is_christmas_season():
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
-    page_title="Sophias Lern-Assistent",
+    page_title="Deine eigene KI",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -886,5 +886,6 @@ st.markdown("""
     <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem;">
         von Shiva:)    </div>
 """, unsafe_allow_html=True)
+
 
 
