@@ -670,6 +670,7 @@ if send_button and user_input:
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
     <div style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.8rem;">
-       Shiva :)
+      Von Shiva :)
     </div>
 """, unsafe_allow_html=True)
+
