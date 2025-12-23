@@ -884,7 +884,7 @@ with col2:
 st.markdown("""
     <br><br>
     <div style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.8rem;">
-        Mit 💜 von Shiva für Sophia
-    </div>
+        von Shiva:)    </div>
 """, unsafe_allow_html=True)
+
 
